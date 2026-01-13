@@ -3,7 +3,7 @@ name: MLOps Pipeline
 # Déclencheur : À chaque 'push' sur la branche main [cite: 96]
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "*" ]
 
 jobs:
   build-and-test:
