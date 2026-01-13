@@ -1,0 +1,45 @@
+name: MLOps Pipeline
+
+# Déclencheur : À chaque 'push' sur la branche main [cite: 96]
+on:
+  push:
+    branches: [ "*" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Étape 1 : Récupération du code (Checkout)
+    - uses: actions/checkout@v3
+
+    # Étape 2 : Installation de Python
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    # Étape 3 : Installation des dépendances
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    # Étape 4 : Pipeline ML (Entraînement & Génération des données) [cite: 286]
+    # Cela correspond à la phase "Build" du cycle de vie [cite: 58]
+    - name: Train Model & Generate Data
+      run: python my_model.py
+
+    # Étape 5 : Tests Automatisés (CI) [cite: 96, 239]
+    # Si cette étape échoue, le pipeline s'arrête (Stop the Line)
+    - name: Run MLOps Tests (Data, Model, Perf)
+      run: pytest test_ml_system.py -v
+
+    # Étape 6 : Livraison de l'artefact (CD - Partie Delivery) 
+    # On sauvegarde le modèle 'model.joblib' seulement si les tests passent
+    - name: Archive Production Artifact
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: trained-model
+        path: model.joblib

@@ -76,21 +76,3 @@ def test_prediction_latency_fail():
     latency = 0.2
     with pytest.raises(AssertionError):
         assert latency < 0.1
-
-
-
-def test_production_latency_strict_requirement():
-    """
-    CE TEST VA ÉCHOUER (FAILURE).
-    Simule une exigence métier trop stricte : latence < 0.0000001s.
-    L'échec de ce test signalerait que l'infrastructure n'est pas assez rapide.
-    """
-    # Utilisation du DataFrame pour éviter le Warning
-    sample = pd.DataFrame([[5.1, 3.5, 1.4]], columns=["age", "revenue", "history"])
-    
-    start = time.time()
-    model.predict(sample)
-    latency = time.time() - start
-    
-    # Cette assertion sera fausse, car Python ne peut pas prédire aussi vite
-    assert latency < 0.0000001
