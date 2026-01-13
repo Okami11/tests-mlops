@@ -39,7 +39,7 @@ jobs:
     # On sauvegarde le modèle 'model.joblib' seulement si les tests passent
     - name: Archive Production Artifact
       if: success()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: trained-model
         path: model.joblib
