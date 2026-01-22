@@ -48,6 +48,16 @@ def test_column_types_success():
     assert pd.api.types.is_numeric_dtype(df['age'])
     assert pd.api.types.is_numeric_dtype(df['revenue'])
 
+def test_age_plausible_max_success():
+    """SUCCÈS : L'âge doit être inférieur à 120 ans"""
+    df = pd.read_csv("data/sample_input.csv")
+    assert (df['age'] < 120).all()
+
+def test_revenue_reasonable_range():
+    """SUCCÈS : Le revenu ne doit pas être extrêment élevé (ex: < 1M pour ce dataset)"""
+    df = pd.read_csv("data/sample_input.csv")
+    assert (df['revenue'] < 1000000).all()
+
 # =================================================================
 # 2. TESTS DE MODÈLE (Model Validity)
 # =================================================================
@@ -85,6 +95,19 @@ def test_prediction_consistency():
     pred2 = model.predict(sample)
     assert np.array_equal(pred1, pred2)
 
+def test_prediction_valid_classes():
+    """SUCCÈS : La prédiction doit être une des classes connues (0, 1, 2)"""
+    sample = np.array([[5.1, 3.5, 1.4]])
+    prediction = model.predict(sample)
+    assert prediction[0] in [0, 1, 2]
+
+def test_input_dimension_mismatch_fail():
+    """ÉCHEC : Le modèle doit lever une erreur si la dimension d'entrée est incorrecte"""
+    # 2 features au lieu de 3
+    bad_sample = np.array([[5.1, 3.5]])
+    with pytest.raises(ValueError):
+        model.predict(bad_sample)
+
 # =================================================================
 # 3. TESTS DE PERFORMANCE (Infrastructure)
 # =================================================================
@@ -113,3 +136,21 @@ def test_inference_throughput():
     total_time = time.time() - start
     # Doit traiter 100 requêtes en moins de 0.5s
     assert total_time < 0.5
+
+def test_model_artifact_size():
+    """SUCCÈS : Le modèle sauvegardé doit être léger (< 1MB pour un Iris classifier)"""
+    file_size = os.path.getsize("model.joblib")
+    # Taille minime pour un Random Forest sur Iris (~10-100KB)
+    assert file_size < 1_000_000 # 1MB
+
+def test_cold_start_latency():
+    """SUCCÈS : La première prédiction (cold start) ne doit pas être exagérément lente"""
+    # Force reload pour simuler un cold start
+    loaded_model = joblib.load("model.joblib")
+    sample = np.array([[5.1, 3.5, 1.4]])
+    
+    start = time.time()
+    loaded_model.predict(sample)
+    latency = time.time() - start
+    
+    assert latency < 0.5 # Marge plus large pour le 1er appel
