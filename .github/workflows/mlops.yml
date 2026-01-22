@@ -1,6 +1,6 @@
 name: MLOps Pipeline
 
-# Déclencheur : À chaque 'push' sur la branche main [cite: 96]
+# Déclencheur : À chaque 'push' sur la branche main
 on:
   push:
     branches: [ "*" ]
@@ -25,12 +25,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    # Étape 4 : Pipeline ML (Entraînement & Génération des données) [cite: 286]
-    # Cela correspond à la phase "Build" du cycle de vie [cite: 58]
+    # Étape 4 : Pipeline ML (Entraînement & Génération des données)
+    # Cela correspond à la phase "Build" du cycle de vie
     - name: Train Model & Generate Data
       run: python my_model.py
 
-    # Étape 5 : Tests Automatisés (CI) [cite: 96, 239]
+    # Étape 5 : Tests Automatisés (CI)
     # Si cette étape échoue, le pipeline s'arrête (Stop the Line)
     - name: Run MLOps Tests (Data, Model, Perf)
       run: pytest test_ml_system.py -v
